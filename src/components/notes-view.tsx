@@ -12,7 +12,7 @@ type State = {
 
 enum Actions {
   SET_LOADING,
-  GET_NOTES,
+  SET_NOTES,
   ADD_NOTE,
   UPDATE_NOTE,
   DELETE_NOTE,
@@ -21,63 +21,86 @@ enum Actions {
 type ActionType = {
   type:
     | Actions.SET_LOADING
-    | Actions.GET_NOTES
+    | Actions.SET_NOTES
     | Actions.ADD_NOTE
     | Actions.UPDATE_NOTE
     | Actions.DELETE_NOTE;
+  payload: {
+    notes?: Array<Note>;
+    note?: Note;
+    isLoading?: boolean;
+    error?: Error;
+  };
 };
 
 const notesReducer = (state: State, action: ActionType): State => {
-  let newState: State = {};
+  console.log("ACTION: " + action.type, state);
 
   switch (action.type) {
     case Actions.SET_LOADING:
-      newState = { ...state, isLoading: true };
-      break;
-    case Actions.GET_NOTES:
+      return { ...state, isLoading: action.payload.isLoading };
+    case Actions.SET_NOTES:
       console.log("getNotes-----------");
-      NotesService.getNotes()
-        .then((notes) => {
-          console.log(notes);
-          console.log("-----------");
-          newState = { ...state, isLoading: false, notes };
-        })
-        .catch((error) => {
-          newState = { ...state, error };
-        });
+      return { ...state, notes: action.payload.notes };
+
       break;
     default:
-      newState = state;
+      throw new Error(`Invalid action sent to reducer`);
   }
-  return newState;
+
+  return state;
+};
+
+//
+const initialState = {
+  notes: new Array<Note>(),
+  isLoading: true,
 };
 
 export const NotesView: React.FC<{}> = () => {
-  //
-  const initialState = {
-    notes: new Array<Note>(),
-    isLoading: false,
-  };
+  console.log("START: NotesView");
   const [state, dispatch] = useReducer(notesReducer, initialState);
 
-  // Inititally, obtain all the currently existing notes:
+  //Inititally, obtain all the currently existing notes:
   useEffect(() => {
-    dispatch({ type: Actions.SET_LOADING });
-    dispatch({ type: Actions.GET_NOTES });
+    console.log("USE EFFECT RAN!");
+    dispatch({ type: Actions.SET_LOADING, payload: { isLoading: true } });
+    NotesService.getNotes()
+      .then((notes) => {
+        console.log(notes);
+        console.log("-----------");
+        dispatch({
+          type: Actions.SET_NOTES,
+          payload: { notes: notes, isLoading: false },
+        });
+        dispatch({ type: Actions.SET_LOADING, payload: { isLoading: false } });
+      })
+      .catch((error) => {
+        return { ...state, error: error };
+      });
   }, []);
 
+  console.log("state:", state);
   return (
     <React.Fragment>
-      <Grid container>
-        <Grid item xs={4}>
-          <div>
-            <ThreeDRotation />
-          </div>
-          <Typography>Filled</Typography>
-          <CloseOutlined />
-        </Grid>
-      </Grid>
-      {state.isLoading ? <Typography>Loading...</Typography> : null}
+      <div>
+        {/*<Grid container>
+          <Grid item xs={4}>
+            <div>
+              <ThreeDRotation />
+            </div>
+            <Typography>Filled</Typography>
+            <CloseOutlined />
+          </Grid>
+        </Grid>*/}
+        <div>
+          {state.isLoading === true ? (
+            <Typography>{state.isLoading + ""}</Typography>
+          ) : (
+            <Typography>done</Typography>
+          )}
+        </div>
+      </div>
     </React.Fragment>
   );
 };
