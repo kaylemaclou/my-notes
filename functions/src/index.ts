@@ -1,7 +1,7 @@
 import * as functions from "firebase-functions";
 import * as url from "url";
 import { Note } from "./model";
-import FirestoreCollection from "./FirestoreCollection/FirestoreCollection";
+import FirestoreCollection from "./firestore/firestore-collection";
 
 // CORS middleware.
 const cors = require("cors")({
