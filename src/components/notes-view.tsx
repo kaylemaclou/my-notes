@@ -3,9 +3,9 @@ import { Grid, Typography } from "@material-ui/core";
 import { CloseOutlined, ThreeDRotation } from "@material-ui/icons";
 import { Note } from "../model";
 import NotesService from "../services/notes.service";
-import { notesReducer, NotesActions } from "./notes-reducer";
+//import { notesReducer, NotesActions, NotesState } from "./notes-reducer";
+import Storihoox from "../store/redoox";
 
-//
 const initialState = {
   notes: new Array<Note>(),
   isLoading: true,
@@ -13,31 +13,32 @@ const initialState = {
 
 export const NotesView: React.FC<{}> = () => {
   console.log("START: NotesView");
-  const [state, dispatch] = useReducer(notesReducer, initialState);
+  //const [state, dispatch] = useReducer(notesReducer, initialState);
 
-  //Inititally, obtain all the currently existing notes:
-  useEffect(() => {
-    console.log("USE EFFECT RAN!");
-    dispatch({ type: NotesActions.SET_LOADING, payload: { isLoading: true } });
-    NotesService.getNotes()
-      .then((notes) => {
-        console.log(notes);
-        console.log("-----------");
-        dispatch({
-          type: NotesActions.SET_NOTES,
-          payload: { notes: notes, isLoading: false },
-        });
-        dispatch({
-          type: NotesActions.SET_LOADING,
-          payload: { isLoading: false },
-        });
-      })
-      .catch((error) => {
-        return { ...state, error: error };
-      });
-  }, []);
+  const [store] = Storihoox.useData("isLoading", false);
 
-  console.log("state:", state);
+  //const [store, storeProvider] = Storihoox.useStoreProvider();
+
+  // //Inititally, obtain all the currently existing notes:
+  // useEffect(() => {
+  //   dispatch({ type: NotesActions.SET_LOADING, payload: { isLoading: true } });
+  //   NotesService.getNotes()
+  //     .then((notes) => {
+  //       dispatch({
+  //         type: NotesActions.SET_NOTES,
+  //         payload: { notes: notes, isLoading: false },
+  //       });
+  //       dispatch({
+  //         type: NotesActions.SET_LOADING,
+  //         payload: { isLoading: false },
+  //       });
+  //     })
+  //     .catch((error) => {
+  //       return { ...store, error: error };
+  //     });
+  // }, []);
+
+  console.log("store:", store);
   return (
     <React.Fragment>
       <div>
@@ -51,7 +52,7 @@ export const NotesView: React.FC<{}> = () => {
           </Grid>
         </Grid>*/}
         <div>
-          {state.isLoading === true ? (
+          {store.isLoading === true ? (
             <Typography>Loading...</Typography>
           ) : (
             <Typography></Typography>
